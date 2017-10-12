@@ -73,7 +73,18 @@ class Decoder {
  private:
   DecoderOptions options_;
 };
+#ifdef BUILD_UNITY_PLUGIN
+#if defined(_WIN32)
+extern "C" __declspec(dllexport)
+#endif
+int TestCShapDLLMagicNumber();
 
+#if defined(_WIN32)
+extern "C" __declspec(dllexport)
+#endif
+int DecodeBufferToMesh(char *buffer, unsigned int length);
+
+#endif // BUILD_UNITY_PLUGIN
 }  // namespace draco
 
 #endif  // DRACO_COMPRESSION_DECODE_H_

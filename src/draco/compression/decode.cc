@@ -128,5 +128,40 @@ Status Decoder::DecodeBufferToGeometry(DecoderBuffer *in_buffer,
 void Decoder::SetSkipAttributeTransform(GeometryAttribute::Type att_type) {
   options_.SetAttributeBool(att_type, "skip_attribute_transform", true);
 }
+#ifdef BUILD_UNITY_PLUGIN
+int TestCShapDLLMagicNumber() { return 123456; }
 
+int DecodeBufferToMesh(char *data, unsigned int length) {
+	draco::DecoderBuffer buffer;
+	buffer.Init(data, length);
+	auto type_statusor = draco::Decoder::GetEncodedGeometryType(&buffer);
+	if (!type_statusor.ok()) {
+		return -1;
+	}
+	const draco::EncodedGeometryType geom_type = type_statusor.value();
+	if (geom_type != draco::TRIANGULAR_MESH) {
+		return -1;
+	}
+	draco::Decoder decoder;
+	std::unique_ptr<draco::PointCloud> pc;
+	draco::Mesh *mesh = nullptr;
+	auto statusor = decoder.DecodeMeshFromBuffer(&buffer);
+	if (!statusor.ok()) {
+		return -1;
+	}
+	std::unique_ptr<draco::Mesh> in_mesh = std::move(statusor).value();
+	const int num_faces = in_mesh->num_faces();
+
+	if (in_mesh) {
+		mesh = in_mesh.get();
+		pc = std::move(in_mesh);
+	}
+	if (pc == nullptr) {
+		return -1;
+	}
+
+	return num_faces;
+}
+
+#endif // BUILD_UNITY_PLUGIN
 }  // namespace draco
