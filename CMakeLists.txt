@@ -36,6 +36,8 @@ option(ENABLE_WEXTRA "" OFF)
 option(IGNORE_EMPTY_BUILD_TYPE "" OFF)
 option(BUILD_UNITY_PLUGIN "Build dynamic library for Unity" OFF)
 
+option(BUILD_SHARED_LIBS "" ON)
+
 if (ENABLE_POINT_CLOUD_COMPRESSION)
   add_cxx_preproc_definition("DRACO_POINT_CLOUD_COMPRESSION_SUPPORTED")
 endif ()
@@ -49,7 +51,6 @@ if (ENABLE_MESH_COMPRESSION)
     add_cxx_preproc_definition("DRACO_PREDICTIVE_EDGEBREAKER_SUPPORTED")
   endif ()
 endif ()
-
 
 # Turn on more compiler warnings.
 if (ENABLE_EXTRA_WARNINGS)
