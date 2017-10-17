@@ -82,15 +82,9 @@ class Decoder {
 #endif
         {
 int TestCShapDLLMagicNumber();
-}
 
-#if defined(_WIN32)
-    extern "C" __declspec(dllexport)
-#else
-    extern "C"
-#endif
-    {
-const char *DecodeBufferToMesh(char *buffer, unsigned int length);
+const char *DecodeBufferToMesh(char *data, unsigned int length);
+int TestDecodingAndroid(char *data, unsigned int length);
     
     }
 

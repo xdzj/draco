@@ -756,24 +756,6 @@ else ()
               $<TARGET_OBJECTS:draco_metadata_dec>
               $<TARGET_OBJECTS:draco_point_cloud>
               $<TARGET_OBJECTS:draco_points_dec>)
-  add_library(dracodec_unity
-              MODULE
-              ${draco_version_sources}
-              $<TARGET_OBJECTS:draco_attributes>
-              $<TARGET_OBJECTS:draco_compression_attributes_dec>
-              $<TARGET_OBJECTS:draco_compression_decode>
-              $<TARGET_OBJECTS:draco_compression_mesh_dec>
-              $<TARGET_OBJECTS:draco_compression_point_cloud_dec>
-              $<TARGET_OBJECTS:draco_core>
-              $<TARGET_OBJECTS:draco_core_bit_coders>
-              $<TARGET_OBJECTS:draco_dec_config>
-              $<TARGET_OBJECTS:draco_io>
-              $<TARGET_OBJECTS:draco_mesh>
-              $<TARGET_OBJECTS:draco_metadata>
-              $<TARGET_OBJECTS:draco_metadata_dec>
-              $<TARGET_OBJECTS:draco_point_cloud>
-              $<TARGET_OBJECTS:draco_points_dec>)
-  set_target_properties(dracodec_unity PROPERTIES BUNDLE true)
   add_library(dracoenc
               ${draco_version_sources}
               $<TARGET_OBJECTS:draco_attributes>
@@ -817,6 +799,7 @@ else ()
               $<TARGET_OBJECTS:draco_points_enc>)
   if (BUILD_UNITY_PLUGIN)
     add_library(dracodec_unity
+                MODULE
 	            ${draco_unity_plug_sources}
                 ${draco_version_sources}
                 $<TARGET_OBJECTS:draco_attributes>
@@ -833,6 +816,7 @@ else ()
                 $<TARGET_OBJECTS:draco_metadata_dec>
                 $<TARGET_OBJECTS:draco_point_cloud>
                 $<TARGET_OBJECTS:draco_points_dec>)
+    set_target_properties(dracodec_unity PROPERTIES BUNDLE true)
   endif ()
   set(draco_header_only_targets
       draco_compression_attributes_pred_schemes_dec
@@ -843,11 +827,6 @@ else ()
     set_target_properties(dracodec PROPERTIES SOVERSION 1)
     set_target_properties(dracoenc PROPERTIES SOVERSION 1)
     set_target_properties(draco PROPERTIES SOVERSION 1)
-  endif ()
-
-  # Always build shared library for Unity plugin.
-  if (BUILD_UNITY_PLUGIN)
-    set_target_properties(dracodec_unity PROPERTIES SOVERSION 1)
   endif ()
 
   extract_version_string("${draco_src_root}/core/draco_version.h" draco_version)

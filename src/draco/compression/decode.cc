@@ -18,6 +18,9 @@
 
 #include "draco/compression/config/compression_shared.h"
 
+// For Android, please add DRACO_MESH_COMPRESSION_SUPPORTED to build.gradle
+// https://developer.android.com/ndk/guides/cmake.html
+
 #ifdef DRACO_MESH_COMPRESSION_SUPPORTED
 #include "draco/compression/mesh/mesh_edgebreaker_decoder.h"
 #include "draco/compression/mesh/mesh_sequential_decoder.h"
@@ -132,6 +135,61 @@ void Decoder::SetSkipAttributeTransform(GeometryAttribute::Type att_type) {
 }
 
     
+    int TestDecodingAndroid(char *data, unsigned int length) {
+        draco::DecoderBuffer buffer;
+        buffer.Init(data, length);
+        auto type_statusor = draco::Decoder::GetEncodedGeometryType(&buffer);
+        if (!type_statusor.ok()) {
+            return -1;
+        }
+        const draco::EncodedGeometryType geom_type = type_statusor.value();
+        if (geom_type != draco::TRIANGULAR_MESH) {
+            return -2;
+        }
+        draco::Decoder decoder_old;
+        std::unique_ptr<draco::PointCloud> pc;
+
+        DracoHeader header;
+        auto header_statusor = PointCloudDecoder::DecodeHeader(&buffer, &header);
+        if (!type_statusor.ok()) {
+            return -3;
+        }
+        if (header.encoder_type != TRIANGULAR_MESH) {
+            return -4;
+        }
+        auto decoder_statusor = CreateMeshDecoder(header.encoder_method);
+        if (!decoder_statusor.ok()) {
+            return -5;
+        }
+        std::unique_ptr<MeshDecoder> decoder = std::move(decoder_statusor).value();
+        DecoderOptions options;
+        std::unique_ptr<Mesh> mesh(new Mesh());
+        auto decode_statusor = decoder->Decode(options, &buffer, mesh.get());
+        if (!decoder_statusor.ok()) {
+            return -6;
+        }
+        
+        /*
+        auto statusor = decoder_old.DecodeMeshFromBuffer(&buffer);
+        if (!statusor.ok()) {
+            return -3;
+        }
+        std::unique_ptr<draco::Mesh> in_mesh = std::move(statusor).value();
+        
+        
+        
+        if (in_mesh) {
+            mesh = in_mesh.get();
+            pc = std::move(in_mesh);
+        }
+        if (pc == nullptr) {
+            return -4;
+        }
+         */
+        const int num_faces = mesh->num_faces();
+        return num_faces;
+    }
+    
 int TestCShapDLLMagicNumber() { return 123456; }
     
 const char *DecodeBufferToMesh(char *data, unsigned int length) {
@@ -153,7 +211,6 @@ const char *DecodeBufferToMesh(char *data, unsigned int length) {
 		return statusor.status().error_msg();
 	}
 	std::unique_ptr<draco::Mesh> in_mesh = std::move(statusor).value();
-	const int num_faces = in_mesh->num_faces();
 
 	if (in_mesh) {
 		mesh = in_mesh.get();
@@ -165,5 +222,5 @@ const char *DecodeBufferToMesh(char *data, unsigned int length) {
 
 	return "decode successfully";
 }
-
+    
 }  // namespace draco
