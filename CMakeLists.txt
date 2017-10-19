@@ -738,6 +738,8 @@ else ()
   add_library(draco_points_enc OBJECT
               ${draco_points_common_sources}
               ${draco_points_enc_sources})
+  add_library(draco_unity_plugin OBJECT
+              ${draco_unity_plug_sources})
 
   # Library targets that consume the object collections.
   add_library(dracodec
@@ -800,8 +802,8 @@ else ()
   if (BUILD_UNITY_PLUGIN)
     add_library(dracodec_unity
                 MODULE
-	            ${draco_unity_plug_sources}
                 ${draco_version_sources}
+                $<TARGET_OBJECTS:draco_unity_plugin>
                 $<TARGET_OBJECTS:draco_attributes>
                 $<TARGET_OBJECTS:draco_compression_attributes_dec>
                 $<TARGET_OBJECTS:draco_compression_decode>

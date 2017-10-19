@@ -15,6 +15,10 @@
 #ifndef DRACO_COMPRESSION_DECODE_H_
 #define DRACO_COMPRESSION_DECODE_H_
 
+#define DRACO_MESH_COMPRESSION_SUPPORTED
+// For Android, please add DRACO_MESH_COMPRESSION_SUPPORTED to build.gradle
+// https://developer.android.com/ndk/guides/cmake.html ？？？
+
 #include "draco/compression/config/compression_shared.h"
 #include "draco/compression/config/decoder_options.h"
 #include "draco/compression/point_cloud/point_cloud_decoder.h"
@@ -23,6 +27,7 @@
 #include "draco/mesh/mesh.h"
 
 namespace draco {
+
 
 // Class responsible for decoding of meshes and point clouds that were
 // compressed by a Draco encoder.
@@ -82,6 +87,19 @@ class Decoder {
 #endif
         {
 int TestCShapDLLMagicNumber();
+            struct DracoToUnityMesh {
+                int num_faces;
+                int *indices;
+                int num_vertices;
+                
+                float *position;
+                float *normal;
+                float *texcoord;
+                float *color;
+                
+            };
+            int DecodeMeshForUnity (char *data, unsigned int length, DracoToUnityMesh **tmp_mesh);
+            bool ReleaseMeshForUnity(DracoToUnityMesh *tmp_mesh);
 
 const char *DecodeBufferToMesh(char *data, unsigned int length);
 int TestDecodingAndroid(char *data, unsigned int length);

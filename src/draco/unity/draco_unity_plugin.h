@@ -15,23 +15,22 @@
 #ifndef DRACO_UNITY_DRACO_UNITY_PLUGIN_H_
 #define DRACO_UNITY_DRACO_UNITY_PLUGIN_H_
 
-#ifdef BUILD_UNITY_PLUGIN
+//#ifdef BUILD_UNITY_PLUGIN
 
 namespace draco {
 
-/*
 #if defined(_WIN32)
-extern "C" __declspec(dllexport)
+    extern "C" __declspec(dllexport)
+#else
+    extern "C"
 #endif
-int TestCShapDLLMagicNumber();
-
-#if defined(_WIN32)
-extern "C" __declspec(dllexport)
-#endif
-int DecodeBufferToMesh(char *buffer, unsigned int length);
-*/
+    {
+        int TestUnityModule();
+        
+    }
+    
 }  // namespace draco
 
-#endif // BUILD_UNITY_PLUGIN
+//#endif // BUILD_UNITY_PLUGIN
 
 #endif // DRACO_UNITY_DRACO_UNITY_PLUGIN_H_
