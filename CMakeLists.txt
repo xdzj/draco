@@ -36,8 +36,6 @@ option(ENABLE_WEXTRA "" OFF)
 option(IGNORE_EMPTY_BUILD_TYPE "" OFF)
 option(BUILD_UNITY_PLUGIN "Build dynamic library for Unity" OFF)
 
-option(BUILD_SHARED_LIBS "" ON)
-
 if (ENABLE_POINT_CLOUD_COMPRESSION)
   add_cxx_preproc_definition("DRACO_POINT_CLOUD_COMPRESSION_SUPPORTED")
 endif ()
@@ -90,6 +88,7 @@ if (ENABLE_GOMA)
   set_compiler_launcher(ENABLE_GOMA gomacc)
 endif ()
 if (BUILD_UNITY_PLUGIN)
+  set(BUILD_SHARED_LIBS ON CACHE BOOL "Build shared library for unity plugin.")
   add_cxx_preproc_definition("BUILD_UNITY_PLUGIN")
 endif ()
 
@@ -818,7 +817,10 @@ else ()
                 $<TARGET_OBJECTS:draco_metadata_dec>
                 $<TARGET_OBJECTS:draco_point_cloud>
                 $<TARGET_OBJECTS:draco_points_dec>)
-    set_target_properties(dracodec_unity PROPERTIES BUNDLE true)
+    # For Mac, we need to build a .bundle for plugin.
+    if (APPLE)
+      set_target_properties(dracodec_unity PROPERTIES BUNDLE true)
+    endif ()
   endif ()
   set(draco_header_only_targets
       draco_compression_attributes_pred_schemes_dec
@@ -829,6 +831,9 @@ else ()
     set_target_properties(dracodec PROPERTIES SOVERSION 1)
     set_target_properties(dracoenc PROPERTIES SOVERSION 1)
     set_target_properties(draco PROPERTIES SOVERSION 1)
+  endif ()
+  if (BUILD_UNITY_PLUGIN)
+    set_target_properties(dracodec_unity PROPERTIES SOVERSION 1)
   endif ()
 
   extract_version_string("${draco_src_root}/core/draco_version.h" draco_version)
