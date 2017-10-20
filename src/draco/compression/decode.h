@@ -17,7 +17,6 @@
 
 #include "draco/compression/config/compression_shared.h"
 #include "draco/compression/config/decoder_options.h"
-#include "draco/compression/point_cloud/point_cloud_decoder.h"
 #include "draco/core/decoder_buffer.h"
 #include "draco/core/statusor.h"
 #include "draco/mesh/mesh.h"

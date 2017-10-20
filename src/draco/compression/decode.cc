@@ -18,8 +18,6 @@
 
 #include "draco/compression/config/compression_shared.h"
 
-
-
 #ifdef DRACO_MESH_COMPRESSION_SUPPORTED
 #include "draco/compression/mesh/mesh_edgebreaker_decoder.h"
 #include "draco/compression/mesh/mesh_sequential_decoder.h"
