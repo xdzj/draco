@@ -39,12 +39,6 @@ enum MeshAttributeElementType {
 // Mesh class can be used to represent general triangular meshes. Internally,
 // Mesh is just an extended PointCloud with extra connectivity data that defines
 // what points are connected together in triangles.
-#if defined(_WIN32)
-    extern "C" __declspec(dllexport)
-#else
-    extern "C"
-#endif
-    {
 class Mesh : public PointCloud {
  public:
   typedef std::array<PointIndex, 3> Face;
@@ -116,7 +110,6 @@ class Mesh : public PointCloud {
 
   friend struct MeshHasher;
 };
-    }
 
 // Functor for computing a hash from data stored within a mesh.
 // Note that this can be quite slow. Two meshes will have the same hash only
