@@ -17,9 +17,6 @@
 #include "draco/compression/mesh/mesh_edgebreaker_traversal_predictive_decoder.h"
 #include "draco/compression/mesh/mesh_edgebreaker_traversal_valence_decoder.h"
 
-#define DRACO_STANDARD_EDGEBREAKER_SUPPORTED
-#define DRACO_PREDICTIVE_EDGEBREAKER_SUPPORTED
-
 namespace draco {
 
 MeshEdgeBreakerDecoder::MeshEdgeBreakerDecoder() {}

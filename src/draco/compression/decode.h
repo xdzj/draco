@@ -15,10 +15,6 @@
 #ifndef DRACO_COMPRESSION_DECODE_H_
 #define DRACO_COMPRESSION_DECODE_H_
 
-#define DRACO_MESH_COMPRESSION_SUPPORTED
-// For Android, please add DRACO_MESH_COMPRESSION_SUPPORTED to build.gradle
-// https://developer.android.com/ndk/guides/cmake.html ？？？
-
 #include "draco/compression/config/compression_shared.h"
 #include "draco/compression/config/decoder_options.h"
 #include "draco/compression/point_cloud/point_cloud_decoder.h"
