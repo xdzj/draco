@@ -1,8 +1,8 @@
 ---
 layout: spec-page
-title: Draco Bitstream Specification (Draft)
-version: Version 1,2
-version_date: Released 2017-xx-xx
+title: Draco Bitstream Specification
+version: Version 2,2 (pending)
+version_date: Released 2017-10-02
 ---
 
 <ol class="breadcrumb">
@@ -15,37 +15,34 @@ version_date: Released 2017-xx-xx
 {% include_relative 00.00.02.authors.md %}
 {% include_relative 00.00.03.last.modified.md %}
 {% include_relative 00.00.04.abstract.md %}
-
 {% include_relative 00.00.05.toc.md %}
 
 {% include_relative 01.00.00.scope.md %}
-{% include_relative 02.00.00.terms.md %}
 {% include_relative 03.00.00.symbols.md %}
 {% include_relative 04.00.00.conventions.md %}
 {% include_relative draco.decoder.md %}
 {% include_relative metadata.decoder.md %}
-{% include_relative mesh.decoder.md %}
+{% include_relative connectivity.decoder.md %}
+{% include_relative sequential.decoder.md %}
 {% include_relative edgebreaker.decoder.md %}
-{% include_relative edgebreaker.hole.and.topology.md %}
-{% include_relative edgebreaker.traversal.decoder.md %}
-{% include_relative edgebreaker.traversal.valence.decoder.md %}
+{% include_relative edgebreaker.traversal.md %}
+{% include_relative edgebreaker.traversal.valence.md %}
+{% include_relative edgebreaker.traversal.prediction.degree.md %}
 {% include_relative attributes.decoder.md %}
-{% include_relative sequential.attributes.decoders.controller.md %}
-{% include_relative sequential.attribute.decoder.md %}
 {% include_relative sequential.integer.attribute.decoder.md %}
+{% include_relative boundary.decoder.md %}
+{% include_relative prediction.decoder.md %}
 {% include_relative sequential.quantization.attribute.decoder.md %}
-{% include_relative prediction.scheme.transform.md %}
-{% include_relative prediction.scheme.wrap.transform.md %}
-{% include_relative mesh.prediction.scheme.parallelogram.md %}
-{% include_relative cornertable.traversal.processor.md %}
-{% include_relative mesh.attribute.indices.encoding.observer.md %}
-{% include_relative edgebreaker.traverser.md %}
-{% include_relative mesh.traversal.sequencer.md %}
-{% include_relative corner.table.md %}
-{% include_relative mesh.attribute.corner.table.md %}
-{% include_relative symbol.decoding.md %}
+{% include_relative sequential.normal.attribute.decoder.md %}
+{% include_relative prediction.texcoords.decoder.md %}
+{% include_relative prediction.normal.decoder.md %}
+{% include_relative prediction.normal.transform.md %}
+{% include_relative prediction.wrap.transform.md %}
+{% include_relative prediction.parallelogram.decoder.md %}
+{% include_relative prediction.multi.parallelogram.decoder.md %}
 {% include_relative rans.decoding.md %}
-{% include_relative rans.bit.decoder.md %}
+{% include_relative corner.md %}
+{% include_relative vector.md %}
 {% include_relative core.functions.md %}
 {% include_relative variable.descriptions.md %}
 

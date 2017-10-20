@@ -1,299 +1,88 @@
 ## EdgeBreaker Decoder
 
-### DecodeConnectivityData()
+### ParseEdgebreakerConnectivityData()
 
 ~~~~~
-DecodeConnectivityData() {
-  edgebreaker_traversal_type                                                         UI8
-  num_new_verts                                                                      varUI32
-  num_encoded_vertices                                                               varUI32
-  num_faces                                                                          varUI32
-  num_attribute_data                                                                 I8
-  num_encoded_symbols                                                                varUI32
-  num_encoded_split_symbols                                                          varUI32
-  encoded_connectivity_size                                                          varUI32
-  // file pointer must be set to current position
-  // + encoded_connectivity_size
-  hole_and_split_bytes = DecodeHoleAndTopologySplitEvents()
-  // file pointer must be set to old current position
-  EdgeBreakerTraversalValence_Start(num_encoded_vertices)
-  DecodeConnectivity(num_symbols)
-  if (attribute_data_.size() > 0) {
-    for (ci = 0; ci < corner_table_->num_corners(); ci += 3) {
-      DecodeAttributeConnectivitiesOnFace(ci)
-    }
-  }
-  for (i = 0; i < corner_table_->num_vertices(); ++i) {
-    if (is_vert_hole_[i]) {
-      corner_table_->UpdateVertexToCornerMap(i);
-    }
-  }
-  // Decode attribute connectivity.
-  for (uint32_t i = 0; i < attribute_data_.size(); ++i) {
-    attribute_data_[i].connectivity_data.InitEmpty(corner_table_);
-    for (int32_t c : attribute_data_[i].attribute_seam_corners) {
-      attribute_data_[i].connectivity_data.AddSeamEdge(c);
-    }
-    attribute_data_[i].connectivity_data.RecomputeVertices(nullptr,
-                                                           nullptr);
-  }
-  // Preallocate vertex to value mapping
-  AssignPointsToCorners()
+void ParseEdgebreakerConnectivityData() {
+  edgebreaker_traversal_type                                                          UI8
+  num_new_vertices                                                                    varUI32
+  num_encoded_vertices                                                                varUI32
+  num_faces                                                                           varUI32
+  num_attribute_data                                                                  UI8
+  num_encoded_symbols                                                                 varUI32
+  num_encoded_split_symbols                                                           varUI32
 }
 ~~~~~
 {:.draco-syntax }
 
 
-### AssignPointsToCorners()
+### ParseTopologySplitEvents()
 
 ~~~~~
-AssignPointsToCorners() {
-  decoder_->mesh()->SetNumFaces(corner_table_->num_faces());
-  if (attribute_data_.size() == 0) {
-    for (f = 0; f < decoder_->mesh()->num_faces(); ++f) {
-      for (c = 0; c < 3; ++c) {
-        vert_id = corner_table_->Vertex(3 * f + c);
-        if (point_id == -1)
-          point_id = num_points++;
-        face[c] = point_id;
-      }
-      decoder_->mesh()->SetFace(f, face);
-    }
-    decoder_->point_cloud()->set_num_points(num_points);
-    Return true;
+void ParseTopologySplitEvents() {
+  num_topology_splits                                                                 varUI32
+  for (i = 0; i < num_topology_splits; ++i) {
+    source_id_delta[i]                                                                varUI32
+    split_id_delta[i]                                                                 varUI32
   }
-  for (v = 0; v < corner_table_->num_vertices(); ++v) {
-    c = corner_table_->LeftMostCorner(v);
-    if (c < 0)
-      continue;
-    deduplication_first_corner = c;
-    if (!is_vert_hole_[v]) {
-      for (uint32_t i = 0; i < attribute_data_.size(); ++i) {
-        if (!attribute_data_[i].connectivity_data.IsCornerOnSeam(c))
-          continue;
-        vert_id = attribute_data_[i].connectivity_data.Vertex(c);
-        act_c = corner_table_->SwingRight(c);
-        seam_found = false;
-        while (act_c != c) {
-          if (attribute_data_[i].connectivity_data.Vertex(act_c) !=
-	      vert_id) {
-            deduplication_first_corner = act_c;
-            seam_found = true;
-            break;
-          }
-          act_c = corner_table_->SwingRight(act_c);
-        }
-        if (seam_found)
-          break;
-      }
-    }
-    c = deduplication_first_corner;
-    corner_to_point_map[c] = point_to_corner_map.size();
-    point_to_corner_map.push_back(c);
-    prev_c = c;
-    c = corner_table_->SwingRight(c);
-    while (c >= 0 && c != deduplication_first_corner) {
-      attribute_seam = false;
-      for (uint32_t i = 0; i < attribute_data_.size(); ++i) {
-        if (attribute_data_[i].connectivity_data.Vertex(c) !=
-            attribute_data_[i].connectivity_data.Vertex(prev_c)) {
-          attribute_seam = true;
-          break;
-        }
-      }
-      if (attribute_seam) {
-        corner_to_point_map[c] = point_to_corner_map.size();
-        point_to_corner_map.push_back(c);
-      } else {
-        corner_to_point_map[c] = corner_to_point_map[prev_c];
-      }
-      prev_c = c;
-      c = corner_table_->SwingRight(c);
-    }
-  }
-  for (f = 0; f < decoder_->mesh()->num_faces(); ++f) {
-    for (c = 0; c < 3; ++c) {
-      face[c] = corner_to_point_map[3 * f + c];
-    }
-    decoder_->mesh()->SetFace(f, face);
-  }
-  decoder_->point_cloud()->set_num_points(point_to_corner_map.size());
-}
-~~~~~
-{:.draco-syntax }
-
-
-### DecodeConnectivity()
-
-~~~~~
-DecodeConnectivity(num_symbols) {
-  for (i = 0; i < num_symbols; ++i) {
-    symbol = TraversalValence_DecodeSymbol()
-    corner = 3 * num_faces++
-    if (symbol == TOPOLOGY_C) {
-      vertex_x = UpdateCornerTableForSymbolC()
-      is_vert_hole_[vertex_x] = false;
-    } else if  (symbol == TOPOLOGY_R || symbol == TOPOLOGY_L) {
-      UpdateCornerTableForSymbolLR()
-      check_topology_split = true;
-    } else if  (symbol == TOPOLOGY_S) {
-      HandleSymbolS()
-    } else if  (symbol == TOPOLOGY_E) {
-      UpdateCornerTableForSymbolE()
-      check_topology_split = true;
-    }
-    active_corner_stack.back() = corner;
-    traversal_decoder_.NewActiveCornerReached(corner);
-    if (check_topology_split) {
-      encoder_symbol_id = num_symbols - symbol_id - 1;
-      while (true) {
-        split = IsTopologySplit(encoder_symbol_id, &split_edge,
-                                &encoder_split_symbol_id);
-        if (!split) {
-          break;
-        }
-        act_top_corner = corner;
-        if (split_edge == RIGHT_FACE_EDGE) {
-          new_active_corner = corner_table_->Next(act_top_corner);
-        } else {
-          new_active_corner = corner_table_->Previous(act_top_corner);
-        }
-        decoder_split_symbol_id = num_symbols -
-	                          encoder_split_symbol_id - 1;
-        topology_split_active_corners[decoder_split_symbol_id] =
-            new_active_corner;
-      }
-    }
-  }
-  while (active_corner_stack.size() > 0) {
-    corner = active_corner_stack.pop_back();
-    interior_face = traversal_decoder_.DecodeStartFaceConfiguration();
-    if (interior_face == true) {
-      UpdateCornerTableForInteriorFace()
-      for (ci = 0; ci < 3; ++ci) {
-        is_vert_hole_[corner_table_->Vertex(new_corner + ci)] = false;
-      }
-      init_face_configurations_.push_back(true);
-      init_corners_.push_back(new_corner);
-    } else {
-      init_face_configurations_.push_back(false);
-      init_corners_.push_back(corner);
-    }
+  for (i = 0; i < num_topology_splits; ++i) {
+    source_edge_bit[i]                                                                f[1]
   }
 }
 ~~~~~
 {:.draco-syntax }
 
 
-### UpdateCornerTableForSymbolC()
+### DecodeEdgebreakerConnectivityData()
 
 ~~~~~
-UpdateCornerTableForSymbolC(corner) {
-  corner_a = active_corner_stack.back();
-  corner_b = corner_table_->Previous(corner_a);
-  while (corner_table_->Opposite(corner_b) >= 0) {
-    corner_b = corner_table_->Previous(corner_table_->Opposite(corner_b));
+void DecodeEdgebreakerConnectivityData() {
+  ParseEdgebreakerConnectivityData();
+  DecodeTopologySplitEvents();
+  EdgebreakerTraversalStart();
+  DecodeEdgeBreakerConnectivity();
+}
+~~~~~
+{:.draco-syntax }
+
+### GetNumComponents()
+
+~~~~~
+int GetNumComponents() {
+  decoder_type = seq_att_dec_decoder_type[curr_att_dec][curr_att];
+  if (decoder_type == SEQUENTIAL_ATTRIBUTE_ENCODER_NORMALS) {
+    prediction_scheme = seq_att_dec_prediction_scheme[curr_att_dec][curr_att];
+    if (prediction_scheme == PREDICTION_DIFFERENCE) {
+      return 2;
+    }
   }
-  SetOppositeCorners(corner_a, corner + 1);
-  SetOppositeCorners(corner_b, corner + 2);
-  vertex_x = corner_table_->Vertex(corner_table_->Next(corner_a));
-  corner_table_->MapCornerToVertex(corner, vertex_x);
-  corner_table_->MapCornerToVertex(
-          corner + 1, corner_table_->Vertex(corner_table_->Next(corner_b)));
-  corner_table_->MapCornerToVertex(
-          corner + 2, corner_table_->Vertex(corner_table_->Previous(corner_a)));
-  return vertex_x;
+  return att_dec_num_components[curr_att_dec][curr_att];
 }
 ~~~~~
 {:.draco-syntax }
 
 
-
-### UpdateCornerTableForSymbolLR()
+### ProcessSplitData()
 
 ~~~~~
-UpdateCornerTableForSymbolLR(corner, symbol) {
-  if (symbol == TOPOLOGY_R) {
-    opp_corner = corner + 2;
-  } else {
-    opp_corner = corner + 1;
+void ProcessSplitData() {
+  last_id = 0;
+  for (i = 0; i < source_id_delta.size(); ++i) {
+    source_symbol_id[i] = source_id_delta[i] + last_id;
+    split_symbol_id.[i] = source_symbol_id[i] - split_id_delta[i];
+    last_id = source_symbol_id[i];
   }
-  SetOppositeCorners(opp_corner, corner_a);
-  corner_table_->MapCornerToVertex(opp_corner,num_vertices++);
-  corner_table_->MapCornerToVertex(
-          corner_table_->Next(opp_corner),
-          corner_table_->Vertex(corner_table_->Previous(corner_a)));
-  corner_table_->MapCornerToVertex(
-          corner_table_->Previous(opp_corner),
-          corner_table_->Vertex(corner_table_->Next(corner_a)));
 }
 ~~~~~
 {:.draco-syntax }
 
 
-### HandleSymbolS()
+### DecodeTopologySplitEvents()
 
 ~~~~~
-HandleSymbolS(corner) {
-  corner_b = active_corner_stack.pop_back();
-  it = topology_split_active_corners.find(symbol_id);
-  if (it != topology_split_active_corners.end()) {
-    active_corner_stack.push_back(it->second);
-  }
-  corner_a = active_corner_stack.back();
-  SetOppositeCorners(corner_a, corner + 2);
-  SetOppositeCorners(corner_b, corner + 1);
-  vertex_p = corner_table_->Vertex(corner_table_->Previous(corner_a));
-  corner_table_->MapCornerToVertex(corner, vertex_p);
-  corner_table_->MapCornerToVertex(
-          corner + 1, corner_table_->Vertex(corner_table_->Next(corner_a)));
-  corner_table_->MapCornerToVertex(corner + 2,
-           corner_table_->Vertex(corner_table_->Previous(corner_b)));
-  corner_n = corner_table_->Next(corner_b);
-  vertex_n = corner_table_->Vertex(corner_n);
-  traversal_decoder_.MergeVertices(vertex_p, vertex_n);
-  // TraversalValence_MergeVertices
-  while (corner_n >= 0) {
-    corner_table_->MapCornerToVertex(corner_n, vertex_p);
-    corner_n = corner_table_->SwingLeft(corner_n);
-  }
-  corner_table_->MakeVertexIsolated(vertex_n);
-}
-~~~~~
-{:.draco-syntax }
-
-
-### UpdateCornerTableForSymbolE()
-
-~~~~~
-UpdateCornerTableForSymbolE() {
-  corner_table_->MapCornerToVertex(corner, num_vertices++);
-  corner_table_->MapCornerToVertex(corner + 1, num_vertices++);
-  corner_table_->MapCornerToVertex(corner + 2, num_vertices++);
-}
-~~~~~
-{:.draco-syntax }
-
-
-### UpdateCornerTableForInteriorFace()
-
-~~~~~
-UpdateCornerTableForInteriorFace() {
-  corner_b = corner_table_->Previous(corner);
-  while (corner_table_->Opposite(corner_b) >= 0) {
-    corner_b = corner_table_->Previous(corner_table_->Opposite(corner_b));
-  }
-  corner_c = corner_table_->Next(corner);
-  while (corner_table_->Opposite(corner_c) >= 0) {
-    corner_c = corner_table_->Next(corner_table_->Opposite(corner_c));
-  }
-  face(num_faces++);
-  corner_table_->MapCornerToVertex(
-          new_corner, corner_table_->Vertex(corner_table_->Next(corner_b)));
-  corner_table_->MapCornerToVertex(
-          new_corner + 1, corner_table_->Vertex(corner_table_->Next(corner_c)));
-  corner_table_->MapCornerToVertex(
-          new_corner + 2, corner_table_->Vertex(corner_table_->Next(corner)));
+void DecodeTopologySplitEvents() {
+  ParseTopologySplitEvents();
+  ProcessSplitData();
 }
 ~~~~~
 {:.draco-syntax }
@@ -302,41 +91,32 @@ UpdateCornerTableForInteriorFace() {
 ### IsTopologySplit()
 
 ~~~~~
-IsTopologySplit(encoder_symbol_id, *out_face_edge,
-                         *out_encoder_split_symbol_id) {
-  if (topology_split_data_.size() == 0)
+bool IsTopologySplit(encoder_symbol_id, out_face_edge,
+                     out_encoder_split_symbol_id) {
+  if (source_symbol_id.back() != encoder_symbol_id)
     return false;
-  if (topology_split_data_.back().source_symbol_id != encoder_symbol_id)
-    return false;
-  *out_face_edge = topology_split_data_.back().source_edge;
-  *out_encoder_split_symbol_id =
-          topology_split_data_.back().split_symbol_id;
-  topology_split_data_.pop_back();
+  *out_face_edge = source_edge_bit.pop_back();
+  *out_encoder_split_symbol_id = split_symbol_id.pop_back();
+  source_symbol_id.pop_back();
   return true;
 }
 ~~~~~
 {:.draco-syntax }
 
 
-### DecodeAttributeConnectivitiesOnFace()
+### ReplaceVerts()
 
 ~~~~~
-DecodeAttributeConnectivitiesOnFace(corner) {
-  corners[3] = {corner, corner_table_->Next(corner),
-                       corner_table_->Previous(corner)}
-  for (c = 0; c < 3; ++c) {
-    opp_corner = corner_table_->Opposite(corners[c]);
-    if (opp_corner < 0) {
-      for (uint32_t i = 0; i < attribute_data_.size(); ++i) {
-        attribute_data_[i].attribute_seam_corners.push_back(corners[c]);
-      }
-      continue
+void ReplaceVerts(from, to) {
+  for (i = 0; i < face_to_vertex[0].size(); ++i) {
+    if (face_to_vertex[0][i] == from) {
+      face_to_vertex[0][i] = to;
     }
-    for (uint32_t i = 0; i < attribute_data_.size(); ++i) {
-      bool is_seam = traversal_decoder_.DecodeAttributeSeam(i);
-      if (is_seam) {
-        attribute_data_[i].attribute_seam_corners.push_back(corners[c]);
-      }
+    if (face_to_vertex[1][i] == from) {
+      face_to_vertex[1][i] = to;
+    }
+    if (face_to_vertex[2][i] == from) {
+      face_to_vertex[2][i] = to;
     }
   }
 }
@@ -344,12 +124,287 @@ DecodeAttributeConnectivitiesOnFace(corner) {
 {:.draco-syntax }
 
 
-### SetOppositeCorners()
+### UpdateCornersAfterMerge()
 
 ~~~~~
-SetOppositeCorners(corner_0, corner_1) {
-  corner_table_->SetOppositeCorner(corner_0, corner_1);
-  corner_table_->SetOppositeCorner(corner_1, corner_0);
+void UpdateCornersAfterMerge(c, v) {
+  opp_corner = PosOpposite(c);
+  if (opp_corner >= 0) {
+    corner_n = Next(opp_corner);
+    while (corner_n >= 0) {
+      MapCornerToVertex(corner_n, v);
+      corner_n = SwingLeft(0, corner_n);
+    }
+  }
+}
+~~~~~
+{:.draco-syntax }
+
+
+### NewActiveCornerReached()
+
+~~~~~
+void NewActiveCornerReached(new_corner, symbol_id) {
+  check_topology_split = false;
+  switch (last_symbol_) {
+    case TOPOLOGY_C:
+      {
+        corner_a = active_corner_stack.back();
+        corner_b = Previous(corner_a);
+        while (PosOpposite(corner_b) >= 0) {
+          b_opp = PosOpposite(corner_b);
+          corner_b = Previous(b_opp);
+        }
+        SetOppositeCorners(corner_a, new_corner + 1);
+        SetOppositeCorners(corner_b, new_corner + 2);
+        active_corner_stack.back() = new_corner;
+      }
+      vert = CornerToVert(Next(corner_a));
+      next = CornerToVert(Next(corner_b));
+      prev = CornerToVert(Previous(corner_a));
+      if (edgebreaker_traversal_type == VALENCE_EDGEBREAKER) {
+        vertex_valences_[next] += 1;
+        vertex_valences_[prev] += 1;
+      }
+      face_to_vertex[0].push_back(vert);
+      face_to_vertex[1].push_back(next);
+      face_to_vertex[2].push_back(prev);
+      is_vert_hole_[vert] = false;
+      MapCornerToVertex(new_corner, vert);
+      MapCornerToVertex(new_corner + 1, next);
+      MapCornerToVertex(new_corner + 2, prev);
+      break;
+    case TOPOLOGY_S:
+      {
+        corner_b = active_corner_stack.pop_back();
+        for (i = 0; i < split_active_corners.size(); ++i) {
+          if (split_active_corners[i].decoder_split_symbol_id == symbol_id) {
+            active_corner_stack.push_back(split_active_corners[i].corner);
+          }
+        }
+        corner_a = active_corner_stack.back();
+        SetOppositeCorners(corner_a, new_corner + 2);
+        SetOppositeCorners(corner_b, new_corner + 1);
+        active_corner_stack.back() = new_corner;
+      }
+
+      vert = CornerToVert(Previous(corner_a));
+      next = CornerToVert(Next(corner_a));
+      prev = CornerToVert(Previous(corner_b));
+      MapCornerToVertex(new_corner, vert);
+      MapCornerToVertex(new_corner + 1, next);
+      MapCornerToVertex(new_corner + 2, prev);
+      corner_n = Next(corner_b);
+      vertex_n = CornerToVert(corner_n);
+      if (edgebreaker_traversal_type == VALENCE_EDGEBREAKER) {
+        vertex_valences_[vert] += vertex_valences_[vertex_n];
+      }
+      ReplaceVerts(vertex_n, vert);
+      if (edgebreaker_traversal_type == VALENCE_EDGEBREAKER) {
+        vertex_valences_[next] += 1;
+        vertex_valences_[prev] += 1;
+      }
+      face_to_vertex[0].push_back(vert);
+      face_to_vertex[1].push_back(next);
+      face_to_vertex[2].push_back(prev);
+      UpdateCornersAfterMerge(new_corner + 1, vert);
+      vertex_corners_[vertex_n] = kInvalidCornerIndex;
+      break;
+    case TOPOLOGY_R:
+      {
+        corner_a = active_corner_stack.back();
+        opp_corner = new_corner + 2;
+        SetOppositeCorners(opp_corner, corner_a);
+        active_corner_stack.back() = new_corner;
+      }
+      check_topology_split = true;
+      vert = CornerToVert(Previous(corner_a));
+      next = CornerToVert(Next(corner_a));
+      prev = ++last_vert_added;
+      if (edgebreaker_traversal_type == VALENCE_EDGEBREAKER) {
+        vertex_valences_[vert] += 1;
+        vertex_valences_[next] += 1;
+        vertex_valences_[prev] += 2;
+      }
+
+      face_to_vertex[0].push_back(vert);
+      face_to_vertex[1].push_back(next);
+      face_to_vertex[2].push_back(prev);
+
+      MapCornerToVertex(new_corner + 2, prev);
+      MapCornerToVertex(new_corner, vert);
+      MapCornerToVertex(new_corner + 1, next);
+      break;
+    case TOPOLOGY_L:
+      {
+        corner_a = active_corner_stack.back();
+        opp_corner = new_corner + 1;
+        SetOppositeCorners(opp_corner, corner_a);
+        active_corner_stack.back() = new_corner;
+      }
+      check_topology_split = true;
+      vert = CornerToVert(Previous(corner_a));
+      next = CornerToVert(Next(corner_a));
+      prev = ++last_vert_added;
+      if (edgebreaker_traversal_type == VALENCE_EDGEBREAKER) {
+        vertex_valences_[vert] += 1;
+        vertex_valences_[next] += 1;
+        vertex_valences_[prev] += 2;
+      }
+
+      face_to_vertex[0].push_back(vert);
+      face_to_vertex[1].push_back(next);
+      face_to_vertex[2].push_back(prev);
+
+      MapCornerToVertex(new_corner + 2, prev);
+      MapCornerToVertex(new_corner, vert);
+      MapCornerToVertex(new_corner + 1, next);
+      break;
+    case TOPOLOGY_E:
+      active_corner_stack.push_back(new_corner);
+      check_topology_split = true;
+      vert = last_vert_added + 1;
+      next = vert + 1;
+      prev = next + 1;
+      if (edgebreaker_traversal_type == VALENCE_EDGEBREAKER) {
+        vertex_valences_[vert] += 2;
+        vertex_valences_[next] += 2;
+        vertex_valences_[prev] += 2;
+      }
+      face_to_vertex[0].push_back(vert);
+      face_to_vertex[1].push_back(next);
+      face_to_vertex[2].push_back(prev);
+      last_vert_added = prev;
+      MapCornerToVertex(new_corner, vert);
+      MapCornerToVertex(new_corner + 1, next);
+      MapCornerToVertex(new_corner + 2, prev);
+      break;
+  }
+
+  if (edgebreaker_traversal_type == VALENCE_EDGEBREAKER) {
+    // Compute the new context that is going to be used
+    // to decode the next symbol.
+    active_valence = vertex_valences_[next];
+    if (active_valence < MIN_VALENCE) {
+      clamped_valence = MIN_VALENCE;
+    } else if (active_valence > MAX_VALENCE) {
+      clamped_valence = MAX_VALENCE;
+    } else {
+      clamped_valence = active_valence;
+    }
+    active_context_ = (clamped_valence - MIN_VALENCE);
+  }
+
+  if (check_topology_split) {
+    encoder_symbol_id = num_encoded_symbols - symbol_id - 1;
+    while (IsTopologySplit(encoder_symbol_id, &split_edge,
+                           &enc_split_id)) {
+      act_top_corner = active_corner_stack.back();
+      if (split_edge == RIGHT_FACE_EDGE) {
+        new_active_corner = Next(act_top_corner);
+      } else {
+        new_active_corner = Previous(act_top_corner);
+      }
+      // Convert the encoder split symbol id to decoder symbol id.
+      dec_split_id = num_encoded_symbols - enc_split_id - 1;
+      topology_edge_list[dec_split_id] = new_active_corner;
+    }
+  }
+}
+~~~~~
+{:.draco-syntax }
+
+
+### ParseEdgebreakerStandardSymbol()
+
+~~~~~
+void ParseEdgebreakerStandardSymbol() {
+  symbol = bit_symbol_buffer.ReadBits(1);
+  if (symbol != TOPOLOGY_C) {
+    // Else decode two additional bits.
+    symbol_suffix = bit_symbol_buffer.ReadBits(2);
+    symbol |= (symbol_suffix << 1);
+  }
+  last_symbol_ = symbol;
+}
+~~~~~
+{:.draco-syntax }
+
+
+### EdgebreakerDecodeSymbol()
+
+~~~~~
+void EdgebreakerDecodeSymbol() {
+  if (edgebreaker_traversal_type == VALENCE_EDGEBREAKER) {
+    EdgebreakerValenceDecodeSymbol(sym);
+  } else if (edgebreaker_traversal_type == STANDARD_EDGEBREAKER) {
+    ParseEdgebreakerStandardSymbol(sym);
+  }
+}
+~~~~~
+{:.draco-syntax }
+
+
+### DecodeEdgeBreakerConnectivity()
+
+~~~~~
+void DecodeEdgeBreakerConnectivity() {
+  is_vert_hole_.assign(num_encoded_vertices + num_encoded_split_symbols, true);
+  for (i = 0; i < num_encoded_symbols; ++i) {
+    EdgebreakerDecodeSymbol();
+    corner = 3 * i;
+    NewActiveCornerReached(corner, i);
+  }
+  ProcessInteriorEdges();
+}
+~~~~~
+{:.draco-syntax }
+
+
+### ProcessInteriorEdges()
+
+~~~~~
+void ProcessInteriorEdges() {
+  AnsDecoder ans_decoder_;
+  RansInitDecoder(ans_decoder_, eb_start_face_buffer,
+      eb_start_face_buffer_size, L_RANS_BASE);
+
+  while (active_corner_stack.size() > 0) {
+    corner_a = active_corner_stack.pop_back();
+    RabsDescRead(ans_decoder_,
+        eb_start_face_buffer_prob_zero, &interior_face);
+    if (interior_face) {
+      corner_b = Previous(corner_a);
+      while (PosOpposite(corner_b) >= 0) {
+        b_opp = PosOpposite(corner_b);
+        corner_b = Previous(b_opp);
+      }
+      corner_c = Next(corner_a);
+      while (PosOpposite(corner_c) >= 0) {
+        c_opp = PosOpposite(corner_c);
+        corner_c = Next(c_opp);
+      }
+      new_corner = face_to_vertex[0].size() * 3;
+      SetOppositeCorners(new_corner, corner_a);
+      SetOppositeCorners(new_corner + 1, corner_b);
+      SetOppositeCorners(new_corner + 2, corner_c);
+
+      CornerToVerts(0, corner_a, &temp_v, &next_a, &temp_p);
+      CornerToVerts(0, corner_b, &temp_v, &next_b, &temp_p);
+      CornerToVerts(0, corner_c, &temp_v, &next_c, &temp_p);
+      MapCornerToVertex(new_corner, next_b);
+      MapCornerToVertex(new_corner + 1, next_c);
+      MapCornerToVertex(new_corner + 2, next_a);
+      face_to_vertex[0].push_back(next_b);
+      face_to_vertex[1].push_back(next_c);
+      face_to_vertex[2].push_back(next_a);
+
+      // Mark all three vertices as interior.
+      is_vert_hole_[next_b] = false;
+      is_vert_hole_[next_c] = false;
+      is_vert_hole_[next_a] = false;
+    }
+  }
 }
 ~~~~~
 {:.draco-syntax }

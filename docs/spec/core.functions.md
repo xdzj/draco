@@ -1,66 +1,59 @@
 
 ## Core Functions
 
-### DecodeVarint<IT>
+### LEB128
 
 ~~~~~
-DecodeVarint<IT>() {
-  If (std::is_unsigned<IT>::value) {
-    in                                                                               UI8
-    If (in & (1 << 7)) {
-      out = DecodeVarint<IT>()
-      out = (out << 7) | (in & ((1 << 7) - 1))
-    } else {
-      typename std::make_unsigned<IT>::type UIT;
-      out = DecodeVarint<UIT>()
-      out = ConvertSymbolToSignedInt(out)
-    }
-    return out;
+uint64_t LEB128() {
+  result = 0;
+  shift = 0;
+  while(true) {
+    in                                                                                UI8
+    result |= (low order 7 bits of in) << shift;
+    if (high order bit of in == 0)
+      break;
+    shift += 7;
+  }
+  return result;
 }
 ~~~~~
 {:.draco-syntax }
 
 
-### ConvertSymbolToSignedInt()
+### mem_get_le16
 
 ~~~~~
-ConvertSymbolToSignedInt() {
-  abs_val = val >> 1
-  If (val & 1 == 0) {
-    return abs_val
-  } else {
-    signed_val = -abs_val - 1
-  }
-  return signed_val
+uint32_t mem_get_le16(mem) {
+  val = mem[1] << 8;
+  val |= mem[0];
+  return val;
 }
 ~~~~~
 {:.draco-syntax }
 
 
-Sequential Decoder
-
-FIXME: ^^^ Heading level?
-
-### decode_connectivity()
+### mem_get_le24
 
 ~~~~~
-decode_connectivity() {
-  num_faces                                                                          I32
-  num_points                                                                         I32
-  connectivity _method                                                               UI8
-  If (connectivity _method == 0) {
-    // TODO
-  } else {
-    loop num_faces {
-      If (num_points < 256) {
-        face[]                                                                       UI8
-      } else if (num_points < (1 << 16)) {
-        face[]                                                                       UI16
-      } else {
-        face[]                                                                       UI32
-      }
-    }
-  }
+uint32_t mem_get_le24(mem) {
+  val = mem[2] << 16;
+  val |= mem[1] << 8;
+  val |= mem[0];
+  return val;
+}
+~~~~~
+{:.draco-syntax }
+
+
+### mem_get_le32
+
+~~~~~
+uint32_t mem_get_le32(mem) {
+  val = mem[3] << 24;
+  val |= mem[2] << 16;
+  val |= mem[1] << 8;
+  val |= mem[0];
+  return val;
 }
 ~~~~~
 {:.draco-syntax }
