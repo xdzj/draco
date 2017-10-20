@@ -23,7 +23,6 @@
 
 namespace draco {
 
-
 // Class responsible for decoding of meshes and point clouds that were
 // compressed by a Draco encoder.
 class Decoder {
@@ -76,30 +75,29 @@ class Decoder {
 };
 
 #if defined(_WIN32)
-    extern "C" __declspec(dllexport)
+extern "C" __declspec(dllexport)
 #else
-    extern "C"
+extern "C"
 #endif
-        {
-int TestCShapDLLMagicNumber();
-            struct DracoToUnityMesh {
-                int num_faces;
-                int *indices;
-                int num_vertices;
-                
-                float *position;
-                float *normal;
-                float *texcoord;
-                float *color;
-                
-            };
-            int DecodeMeshForUnity (char *data, unsigned int length, DracoToUnityMesh **tmp_mesh);
-            bool ReleaseMeshForUnity(DracoToUnityMesh *tmp_mesh);
+{
+  int TestCShapDLLMagicNumber();
+  struct DracoToUnityMesh {
+    int num_faces;
+    int *indices;
+    int num_vertices;
 
-const char *DecodeBufferToMesh(char *data, unsigned int length);
-int TestDecodingAndroid(char *data, unsigned int length);
-    
-    }
+    float *position;
+    float *normal;
+    float *texcoord;
+    float *color;
+  };
+  int DecodeMeshForUnity(char *data, unsigned int length,
+                         DracoToUnityMesh **tmp_mesh);
+  bool ReleaseMeshForUnity(DracoToUnityMesh * tmp_mesh);
+
+  const char *DecodeBufferToMesh(char *data, unsigned int length);
+  int TestDecodingAndroid(char *data, unsigned int length);
+}
 
 }  // namespace draco
 
