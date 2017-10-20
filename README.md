@@ -258,7 +258,8 @@ Android Studio Project Integration
 
 To include Draco in an existing or new Android Studio project, reference it
 from the `cmake` file of an existing native project that has a minimum SDK
-version of 18 or higher. To add Draco to your project:
+version of 18 or higher. The project must support c++11.
+To add Draco to your project:
 
   1. Add the following somewhere within the `CMakeLists.txt` for your project
      before the `add_library()` for your project's native-lib:
@@ -288,6 +289,30 @@ version of 18 or higher. To add Draco to your project:
                             # included in the NDK.
                             ${log-lib} )
      ~~~~~
+  3. Add macro to build.gradle for the features you need:
+     ~~~~~ cmake
+     android {
+         ...
+         defaultConfig {
+             ...   
+             externalNativeBuild {
+                 cmake {
+                     cppFlags "-std=c++11"
+                     cppFlags "-DDRACO_POINT_CLOUD_COMPRESSION_SUPPORTED"
+                     cppFlags "-DDRACO_MESH_COMPRESSION_SUPPORTED"
+                     cppFlags "-DDRACO_STANDARD_EDGEBREAKER_SUPPORTED"
+                     cppFlags "-DDRACO_PREDICTIVE_EDGEBREAKER_SUPPORTED"
+                     cppFlags "-DBUILD_UNITY_PLUGIN"
+                 }
+             }
+         }
+         externalNativeBuild {
+             cmake {
+                 path "CMakeLists.txt"
+             }
+         }
+     }
+     ~~~~
 
 Usage
 ======
