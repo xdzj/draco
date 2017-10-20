@@ -312,7 +312,6 @@ To add Draco to your project:
              }
          }
      }
-     ~~~~
 
 Usage
 ======
