@@ -80,7 +80,6 @@ extern "C" __declspec(dllexport)
 extern "C"
 #endif
 {
-  int TestCShapDLLMagicNumber();
   struct DracoToUnityMesh {
     int num_faces;
     int *indices;
@@ -93,11 +92,9 @@ extern "C"
   };
   int DecodeMeshForUnity(char *data, unsigned int length,
                          DracoToUnityMesh **tmp_mesh);
-  bool ReleaseMeshForUnity(DracoToUnityMesh * tmp_mesh);
 
-  const char *DecodeBufferToMesh(char *data, unsigned int length);
   int TestDecodingAndroid(char *data, unsigned int length);
-}
+}  // extern "C"
 
 }  // namespace draco
 
