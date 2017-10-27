@@ -6,35 +6,11 @@
 ~~~~~
 void DecodeSymbols(num_symbols, num_components, out_values) {
   scheme                                                                              UI8
-  if (scheme == 0) {
+  if (scheme == TAGGED_SYMBOLS) {
     DecodeTaggedSymbols(num_symbols, num_components, out_values);
-  } else if (scheme == 1) {
+  } else if (scheme == RAW_SYMBOLS) {
     DecodeRawSymbols(num_symbols, out_values);
   }
-}
-~~~~~
-{:.draco-syntax }
-
-
-### ComputeRAnsUnclampedPrecision
-
-~~~~~
-int ComputeRAnsUnclampedPrecision(max_bit_length) {
-  return (3 * max_bit_length) / 2;
-}
-~~~~~
-{:.draco-syntax }
-
-
-### ComputeRAnsPrecisionFromMaxSymbolBitLength
-
-~~~~~
-int ComputeRAnsPrecisionFromMaxSymbolBitLength(max_bit_length) {
-  return ComputeRAnsUnclampedPrecision(max_bit_length) < 12
-      ? 12
-      : ComputeRAnsUnclampedPrecision(max_bit_length) > 20
-          ? 20
-          : ComputeRAnsUnclampedPrecision(max_bit_length);
 }
 ~~~~~
 {:.draco-syntax }
@@ -44,24 +20,19 @@ int ComputeRAnsPrecisionFromMaxSymbolBitLength(max_bit_length) {
 
 ~~~~~
 void DecodeTaggedSymbols(num_values, num_components, out_values) {
-  max_symbol_bit_length_t = 5;
-  rans_precision_bits_t =
-      ComputeRAnsPrecisionFromMaxSymbolBitLength(max_symbol_bit_length_t);
-  rans_precision = 1 << rans_precision_bits_t;
-  l_rans_base = rans_precision * 4;
   num_symbols_                                                                        varUI32
   BuildSymbolTables(num_symbols_, lut_table_, probability_table_);
-  bytes_encoded                                                                       varUI64
+  size                                                                                varUI64
   encoded_data                                                                        UI8[size]
-
-  RansInitDecoder(ans_, &encoded_data[0], bytes_encoded, l_rans_base);
+  RansInitDecoder(ans_, &encoded_data[0], size, TAGGED_RANS_BASE);
   for (i = 0; i < num_values; i += num_components) {
-    RansRead(ans_, l_rans_base, rans_precision,
-             lut_table_, probability_table_, &bit_length);
+    RansRead(ans_, TAGGED_RANS_BASE, TAGGED_RANS_PRECISION,
+             lut_table_, probability_table_, &size);
     for (j = 0; j < num_components; ++j) {
-      val                                                                             f[bit_length]
+      val                                                                             f[size]
       out_values.push_back(val);
     }
+    ResetBitReader();
   }
 }
 ~~~~~
@@ -82,9 +53,9 @@ void DecodeRawSymbols(num_values, out_values) {
   rans_precision = 1 << rans_precision_bits;
   l_rans_base = rans_precision * 4;
   BuildSymbolTables(num_symbols_, lut_table_, probability_table_);
-  bytes_encoded                                                                       varUI64
+  size                                                                                varUI64
   buffer                                                                              UI8[size]
-  RansInitDecoder(ans_, &buffer[0], bytes_encoded, l_rans_base);
+  RansInitDecoder(ans_, &buffer[0], size, l_rans_base);
   for (i = 0; i < num_values; ++i) {
     RansRead(ans_, l_rans_base, rans_precision,
               lut_table_, probability_table_, &val);

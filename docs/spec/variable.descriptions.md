@@ -15,6 +15,10 @@
   * 2: SEQUENTIAL_ATTRIBUTE_ENCODER_QUANTIZATION
   * 3: SEQUENTIAL_ATTRIBUTE_ENCODER_NORMALS
 
+* Sequential indices encoding methods
+  * 0: SEQUENTIAL_COMPRESSED_INDICES
+  * 1: SEQUENTIAL_UNCOMPRESSED_INDICES
+
 * Prediction encoding methods
   * -2: PREDICTION_NONE
   * 0: PREDICTION_DIFFERENCE
@@ -65,7 +69,12 @@
   * 4096: rabs_l_base
   * 256: IO_BASE
   * 4096: L_RANS_BASE
+  * 16384: TAGGED_RANS_BASE
+  * 4096: TAGGED_RANS_PRECISION
 
+* Symbol encoding methods
+  * 0: TAGGED_SYMBOLS
+  * 1: RAW_SYMBOLS
 
 
 ### Variables
@@ -136,15 +145,24 @@
   * Last EdgeBreaker symbol decoded
 * last_vert_added
   * Id of the last vertex decoded
-* bit_symbol_buffer
-  * Standard EdgeBreaker encoded symbol buffer
 * active_corner_stack
   * Array of current working corners used during EdgeBreaker decoding
+* edge_breaker_symbol_to_topology_id
+  * Array of EdgeBreaker symbols
+  * 0: TOPOLOGY_C
+  * 1: TOPOLOGY_S
+  * 2: TOPOLOGY_L
+  * 3: TOPOLOGY_R
+  * 4: TOPOLOGY_E
+* topology_split_id
+  * List of decoder split ids encountered during a topology split.
+* split_active_corners
+  * List of corners encountered during a topology split.
 
 #### EdgeBreaker Traversal
 * eb_symbol_buffer_size
 * eb_symbol_buffer
-  * EdgeBreaker encoded symbol data
+  * Standard EdgeBreaker encoded symbol data
 * eb_start_face_buffer_prob_zero
     * Face configuration encoded probability
 * eb_start_face_buffer_size

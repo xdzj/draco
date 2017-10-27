@@ -19,6 +19,7 @@ int64_t ComputeShannonEntropy(const uint32_t *symbols, int num_symbols,
     if (symbol_frequencies[i] > 0) {
       ++num_unique_symbols;
       // Compute Shannon entropy for the symbol.
+      // We don't want to use std::log2 here for Android build.
       total_bits +=
           symbol_frequencies[i] *
           log2(static_cast<double>(symbol_frequencies[i]) / num_symbols_d);

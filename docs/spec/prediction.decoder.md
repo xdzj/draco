@@ -64,6 +64,7 @@ void ParseWrapTransformData() {
 ~~~~~
 void ParseNormalOctahedronCanonicalizedTransformData() {
   pred_trasnform_normal_max_q_val[curr_att_dec][curr_att]                             I32
+  unused_center_value                                                                 I32
 }
 ~~~~~
 {:.draco-syntax}
@@ -114,7 +115,7 @@ void DecodePredictionData_ConstrainedMulti() {
     ParseConstrainedMultiNumFlags();
     if (constrained_multi_num_flags > 0) {
       ParsePredictionRansData();
-      RansInitDecoder(ans_decoder_, data.data() + pos,
+      RansInitDecoder(ans_decoder_, data + pos,
                       prediction_rans_data_size, L_RANS_BASE);
       for (j = 0; j < constrained_multi_num_flags; ++j) {
         RabsDescRead(&ans_decoder_, prediction_rans_prob_zero, &val);
@@ -132,7 +133,7 @@ void DecodePredictionData_ConstrainedMulti() {
 
 ~~~~~
 void ParseTexCoordsNumOrientations() {
-  tex_coords_num_orientations                                                         varUI32
+  tex_coords_num_orientations                                                         UI32
 }
 ~~~~~
 {:.draco-syntax}
@@ -144,7 +145,7 @@ void ParseTexCoordsNumOrientations() {
 void DecodePredictionData_TexCoords() {
   ParseTexCoordsNumOrientations();
   ParsePredictionRansData();
-  RansInitDecoder(ans_decoder_, data.data() + pos,
+  RansInitDecoder(ans_decoder_, data + pos,
                   prediction_rans_data_size, L_RANS_BASE);
   last_orientation = true;
   for (i = 0; i < tex_coords_num_orientations; ++i) {
@@ -164,7 +165,7 @@ void DecodePredictionData_TexCoords() {
 ~~~~~
 void DecodePredictionData_GeometricNormal() {
   ParsePredictionRansData();
-  RansInitDecoder(ans_decoder_, data.data() + pos,
+  RansInitDecoder(ans_decoder_, data + pos,
                   prediction_rans_data_size, L_RANS_BASE);
   num_values = att_dec_num_values_to_decode[curr_att_dec][curr_att];
   for (i = 0; i < num_values; ++i) {
