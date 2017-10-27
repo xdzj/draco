@@ -12,11 +12,13 @@ public class DracoDecodingObject : MonoBehaviour {
 	void Start () {
 		debug_text = GetComponentInChildren<TextMesh> ();
 
-		Mesh mesh = new Mesh();
+		List<Mesh> mesh = new List<Mesh>();
 		DracoMeshLoader draco_loader = new DracoMeshLoader ();
 		int num_faces = draco_loader.LoadMeshFromAsset ("bunny", ref mesh);
+
+		// TODO: Meshes.
 		if (num_faces > 0) {
-			GetComponent<MeshFilter> ().mesh = mesh;
+			GetComponent<MeshFilter> ().mesh = mesh[0];
 		}
 
 		debug_text.text = num_faces.ToString ();
