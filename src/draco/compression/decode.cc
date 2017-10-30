@@ -14,8 +14,6 @@
 //
 #include "draco/compression/decode.h"
 
-#include <cstdlib>
-
 #include "draco/compression/config/compression_shared.h"
 
 #ifdef DRACO_MESH_COMPRESSION_SUPPORTED
