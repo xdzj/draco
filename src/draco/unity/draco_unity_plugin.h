@@ -37,6 +37,7 @@ extern "C" {
     float *texcoord;
     float *color;
   };
+
   int DecodeMeshForUnity(char *data, unsigned int length,
                          DracoToUnityMesh **tmp_mesh);
 }  // extern "C"

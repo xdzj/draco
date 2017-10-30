@@ -56,6 +56,7 @@ _**Contents**_
     * [Metadata API](#metadata-api)
     * [NPM Package](#npm-package)
     * [three.js Renderer Example](#threejs-renderer-example)
+    * [Unity Integration](#unity-integration)
   * [Support](#support)
   * [License](#license)
   * [References](#references)
@@ -576,6 +577,11 @@ Here's an [example] of a geometric compressed with Draco loaded via a
 Javascript decoder using the `three.js` renderer.
 
 Please see the [javascript/example/README.md](javascript/example/README.md) file for more information.
+
+Unity Integration
+-----------------
+We have built plugins for Unity to allow 1) loading Draco files in runtime, 2) import .drc files in design time.
+Please see the [unity/README.md](unity/README.md) for details.
 
 Support
 =======
