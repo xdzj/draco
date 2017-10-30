@@ -74,7 +74,7 @@ void Options::SetVector(const std::string &name, const DataTypeT *vec,
   for (int i = 0; i < num_dims; ++i) {
     if (i > 0)
       out += " ";
-    out += std::to_string(vec[i]);
+    out += to_string(vec[i]);
   }
   options_[name] = out;
 }
@@ -99,13 +99,13 @@ bool Options::GetVector(const std::string &name, int num_dims,
   char *next_str;
   for (int i = 0; i < num_dims; ++i) {
     if (std::is_integral<DataTypeT>::value) {
-      const int val = std::strtol(act_str, &next_str, 10);
+      const int val = strtol(act_str, &next_str, 10);
       if (act_str == next_str)
         return true;  // End reached.
       act_str = next_str;
       out_val[i] = static_cast<DataTypeT>(val);
     } else {
-      const float val = std::strtof(act_str, &next_str);
+      const float val = strtof(act_str, &next_str);
       if (act_str == next_str)
         return true;  // End reached.
       act_str = next_str;

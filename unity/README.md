@@ -50,7 +50,7 @@ path/to/build/Debug(or Release)/dracodec_unity.bundle
 Android
 -------
 
-You should first follow the [Android Studio Project Integration](../README.md) to build Draco within an Android project. Then, to build the plugin for Unity, just add the following flag to build.gradle.
+You should first follow the [Android Studio Project Integration](../README.md#android-studio-project-integration) to build Draco within an Android project. Then, to build the plugin for Unity, just add the following flag to build.gradle.
 ~~~~
 cppFlags "-DBUILD_UNITY_PLUGIN"
 ~~~~
