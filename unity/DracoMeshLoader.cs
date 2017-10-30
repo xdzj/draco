@@ -30,9 +30,6 @@ public unsafe class DracoMeshLoader
 	[DllImport ("dracodec_unity")]
 	private static extern int DecodeMeshForUnity (byte[] buffer, int length, DracoToUnityMesh**tmp_mesh);
 
-	[DllImport ("dracodec_unity")]
-	private static extern int TestDecodingAndroid (byte[] buffer, int length);
-
 	static private int max_num_vertices_per_mesh = 60000;
 
 	// Unity only support maximum 65534 vertices per mesh. So large meshes need to be splited.
