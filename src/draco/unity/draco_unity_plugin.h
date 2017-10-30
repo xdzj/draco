@@ -15,6 +15,9 @@
 #ifndef DRACO_UNITY_DRACO_UNITY_PLUGIN_H_
 #define DRACO_UNITY_DRACO_UNITY_PLUGIN_H_
 
+#include "draco/compression/config/compression_shared.h"
+#include "draco/compression/decode.h"
+
 //#ifdef BUILD_UNITY_PLUGIN
 
 namespace draco {
@@ -28,6 +31,29 @@ namespace draco {
         int TestUnityModule();
         
     }
+    
+#if defined(_WIN32)
+    extern "C" __declspec(dllexport)
+#else
+    extern "C"
+#endif
+    {
+        struct DracoToUnityMesh {
+            int num_faces;
+            int *indices;
+            int num_vertices;
+            
+            float *position;
+            float *normal;
+            float *texcoord;
+            float *color;
+        };
+        int DecodeMeshForUnity(char *data, unsigned int length,
+                               DracoToUnityMesh **tmp_mesh);
+        
+        //int TestDecodingAndroid(char *data, unsigned int length);
+    }  // extern "C"
+
     
 }  // namespace draco
 

@@ -74,28 +74,6 @@ class Decoder {
   DecoderOptions options_;
 };
 
-#if defined(_WIN32)
-extern "C" __declspec(dllexport)
-#else
-extern "C"
-#endif
-{
-  struct DracoToUnityMesh {
-    int num_faces;
-    int *indices;
-    int num_vertices;
-
-    float *position;
-    float *normal;
-    float *texcoord;
-    float *color;
-  };
-  int DecodeMeshForUnity(char *data, unsigned int length,
-                         DracoToUnityMesh **tmp_mesh);
-
-  int TestDecodingAndroid(char *data, unsigned int length);
-}  // extern "C"
-
 }  // namespace draco
 
 #endif  // DRACO_COMPRESSION_DECODE_H_
