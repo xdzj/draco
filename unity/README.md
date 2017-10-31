@@ -17,7 +17,7 @@ Note that the plugin library for different platforms has different file extensio
 | -------- | ------------ |
 | Mac OS | dracodec_unity.bundle |
 | Android | libdracodec_unity.so |
-| Windows | TODO libdracodec_unity.dll |
+| Windows | dracodec_unity.dll |
 
 Prebuilt Library
 ----------------
@@ -103,7 +103,7 @@ For example, please see [DracoDecodingObject.cs](DracoDecodingObject.cs) for usa
 
 Enable Library in Script Debugging
 ----------------------------------
-If you have library for the platform you are working on, e.g. `dracodec_unity.bundle` for Mac or `libdracodec_unity.dll` for  Windows. You should be able to use the plugin in debugging mode.
+If you have library for the platform you are working on, e.g. `dracodec_unity.bundle` for Mac or `dracodec_unity.dll` for  Windows. You should be able to use the plugin in debugging mode.
 
 Import Compressed Draco Assets
 ==============================
