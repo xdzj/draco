@@ -20,14 +20,16 @@
 
 #ifdef BUILD_UNITY_PLUGIN
 
+#if _MSC_VER // this is defined when compiling with Visual Studio
+#define EXPORT_API __declspec(dllexport) // Visual Studio needs annotating exported functions with this
+#else
+#define EXPORT_API // XCode does not need annotating exported functions, so define is empty
+#endif
+
 namespace draco {
 
-#if defined(_WIN32)
-extern "C" __declspec(dllexport) {
-#else
 extern "C" {
-#endif
-  struct DracoToUnityMesh {
+  struct EXPORT_API DracoToUnityMesh {
     int num_faces;
     int *indices;
     int num_vertices;
@@ -38,7 +40,7 @@ extern "C" {
     float *color;
   };
 
-  int DecodeMeshForUnity(char *data, unsigned int length,
+  int EXPORT_API DecodeMeshForUnity(char *data, unsigned int length,
                          DracoToUnityMesh **tmp_mesh);
 }  // extern "C"
 
